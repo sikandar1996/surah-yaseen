@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>سورۃ یٰسین</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    background:#f5f1e8;
+    color:#222;
+    font-family:sans-serif;
+}
+
+.header{
+    background:#176b4d;
+    color:white;
+    text-align:center;
+    padding:25px 15px;
+}
+
+.header h1{
+    margin:0;
+    font-size:32px;
+}
+
+.header p{
+    margin:8px 0 0;
+    font-size:18px;
+}
+
+.buttons{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    padding:15px;
+}
+
+button{
+    border:0;
+    border-radius:10px;
+    padding:10px 16px;
+    font-size:16px;
+    background:#176b4d;
+    color:white;
+}
+
+.content{
+    max-width:700px;
+    margin:auto;
+    padding:10px 15px 30px;
+}
+
+.ayah{
+    background:white;
+    margin:16px 0;
+    padding:20px;
+    border-radius:16px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+
+.number{
+    text-align:center;
+    color:#176b4d;
+    margin-bottom:15px;
+    font-size:16px;
+}
+
+.arabic{
+    font-size:29px;
+    line-height:2.2;
+    text-align:right;
+    margin-bottom:18px;
+}
+
+.translation-title{
+    font-size:15px;
+    font-weight:bold;
+    color:#176b4d;
+    margin-bottom:5px;
+}
+
+.translation{
+    font-size:18px;
+    line-height:1.9;
+    color:#555;
+    margin-bottom:18px;
+    text-align:right;
+}
+
+.english{
+    direction:ltr;
+    text-align:left;
+    font-size:18px;
+    line-height:1.8;
+    color:#444;
+}
+
+.loading{
+    text-align:center;
+    padding:40px 10px;
+    font-size:20px;
+}
+
+.error{
+    text-align:center;
+    padding:40px 10px;
+    color:#b00020;
+}
+
+.dark{
+    background:#121212;
+    color:#eee;
+}
+
+.dark .ayah{
+    background:#1e1e1e;
+}
+
+.dark .translation,
+.dark .english{
+    color:#ccc;
+}
+
+.dark .translation-title,
+.dark .number{
+    color:#70c9a5;
+}
+
+.dark .header{
+    background:#0b4b36;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>سورۃ یٰسین</h1>
+    <p>قرآن پاک</p>
+</div>
+
+<div class="buttons">
+    <button onclick="toggleDark()">🌙 ڈارک موڈ</button>
+</div>
+
+<div class="content" id="content">
+
+    <div class="loading">
+        سورت لوڈ ہو رہی ہے...
+    </div>
+
+</div>
+
+<script>
+
+async function loadSurah(){
+
+    const content = document.getElementById("content");
+
+    try{
+
+        const arabicResponse = await fetch(
+            "https://api.alquran.cloud/v1/surah/36/quran-uthmani"
+        );
+
+        const urduResponse = await fetch(
+            "https://api.alquran.cloud/v1/surah/36/ur.jalandhry"
+        );
+
+        const englishResponse = await fetch(
+            "https://api.alquran.cloud/v1/surah/36/en.sahih"
+        );
+
+        if(
+            !arabicResponse.ok ||
+            !urduResponse.ok ||
+            !englishResponse.ok
+        ){
+            throw new Error("API error");
+        }
+
+        const arabicData = await arabicResponse.json();
+        const urduData = await urduResponse.json();
+        const englishData = await englishResponse.json();
+
+        const arabicAyahs = arabicData.data.ayahs;
+        const urduAyahs = urduData.data.ayahs;
+        const englishAyahs = englishData.data.ayahs;
+
+        content.innerHTML = "";
+
+        arabicAyahs.forEach((ayah,index)=>{
+
+            const box = document.createElement("div");
+
+            box.className = "ayah";
+
+            box.innerHTML = `
+
+                <div class="number">
+                    آیت نمبر ${ayah.numberInSurah}
+                </div>
+
+                <div class="arabic">
+                    ${ayah.text}
+                </div>
+
+                <div class="translation-title">
+                    اردو ترجمہ
+                </div>
+
+                <div class="translation">
+                    ${urduAyahs[index].text}
+                </div>
+
+                <div class="translation-title">
+                    English Translation
+                </div>
+
+                <div class="english">
+                    ${englishAyahs[index].text}
+                </div>
+
+            `;
+
+            content.appendChild(box);
+
+        });
+
+    }
+
+    catch(error){
+
+        content.innerHTML = `
+            <div class="error">
+                سورت لوڈ نہیں ہو سکی۔
+                <br><br>
+                براہ کرم انٹرنیٹ چیک کریں۔
+            </div>
+        `;
+
+    }
+
+}
+
+function toggleDark(){
+
+    document.body.classList.toggle("dark");
+
+}
+
+loadSurah();
+
+</script>
+
+</body>
+</html>
